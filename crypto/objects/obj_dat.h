@@ -10,7 +10,7 @@
  */
 
 /* Serialized OID's */
-static const unsigned char so[9582] = {
+static const unsigned char so[9600] = {
     0x2A,0x86,0x48,0x86,0xF7,0x0D,                 /* [    0] OBJ_rsadsi */
     0x2A,0x86,0x48,0x86,0xF7,0x0D,0x01,            /* [    6] OBJ_pkcs */
     0x2A,0x86,0x48,0x86,0xF7,0x0D,0x02,0x02,       /* [   13] OBJ_md2 */
@@ -1354,9 +1354,11 @@ static const unsigned char so[9582] = {
     0x2A,0x86,0x48,0x86,0xF7,0x0D,0x01,0x09,0x10,0x0D,  /* [ 9549] OBJ_id_smime_ori */
     0x2A,0x86,0x48,0x86,0xF7,0x0D,0x01,0x09,0x10,0x0D,0x03,  /* [ 9559] OBJ_id_smime_ori_kem */
     0x2A,0x86,0x48,0x86,0xF7,0x0D,0x01,0x09,0x10,0x03,0x11,  /* [ 9570] OBJ_id_alg_hss_lms_hashsig */
+    0x2A,0x85,0x03,0x07,0x01,0x01,0x05,0x01,0x03,  /* [ 9581] OBJ_magma_mgm */
+    0x2A,0x85,0x03,0x07,0x01,0x01,0x05,0x02,0x03,  /* [ 9590] OBJ_kuznyechik_mgm */
 };
 
-#define NUM_NID 1502
+#define NUM_NID 1504
 static const ASN1_OBJECT nid_objs[NUM_NID] = {
     {"UNDEF", "undefined", NID_undef},
     {"rsadsi", "RSA Data Security, Inc.", NID_rsadsi, 6, &so[0]},
@@ -2860,9 +2862,11 @@ static const ASN1_OBJECT nid_objs[NUM_NID] = {
     {"id-smime-ori", "id-smime-ori", NID_id_smime_ori, 10, &so[9549]},
     {"id-smime-ori-kem", "id-smime-ori-kem", NID_id_smime_ori_kem, 11, &so[9559]},
     {"id-alg-hss-lms-hashsig", "id-alg-hss-lms-hashsig", NID_id_alg_hss_lms_hashsig, 11, &so[9570]},
+    {"magma-mgm", "magma-mgm", NID_magma_mgm, 9, &so[9581]},
+    {"kuznyechik-mgm", "kuznyechik-mgm", NID_kuznyechik_mgm, 9, &so[9590]},
 };
 
-#define NUM_SN 1493
+#define NUM_SN 1495
 static const unsigned int sn_objs[NUM_SN] = {
      364,    /* "AD_DVCS" */
      419,    /* "AES-128-CBC" */
@@ -3826,6 +3830,7 @@ static const unsigned int sn_objs[NUM_SN] = {
     1012,    /* "kuznyechik-ecb" */
     1183,    /* "kuznyechik-kexp15" */
     1017,    /* "kuznyechik-mac" */
+    1503,    /* "kuznyechik-mgm" */
     1014,    /* "kuznyechik-ofb" */
      477,    /* "lastModifiedBy" */
      476,    /* "lastModifiedTime" */
@@ -3839,6 +3844,7 @@ static const unsigned int sn_objs[NUM_SN] = {
     1187,    /* "magma-ecb" */
     1181,    /* "magma-kexp15" */
     1192,    /* "magma-mac" */
+    1502,    /* "magma-mgm" */
     1189,    /* "magma-ofb" */
      460,    /* "mail" */
      493,    /* "mailPreferenceOption" */
@@ -4359,7 +4365,7 @@ static const unsigned int sn_objs[NUM_SN] = {
     1289,    /* "zstd" */
 };
 
-#define NUM_LN 1493
+#define NUM_LN 1495
 static const unsigned int ln_objs[NUM_LN] = {
      363,    /* "AD Time Stamping" */
      405,    /* "ANSI X9.62" */
@@ -5439,6 +5445,7 @@ static const unsigned int ln_objs[NUM_LN] = {
     1012,    /* "kuznyechik-ecb" */
     1183,    /* "kuznyechik-kexp15" */
     1017,    /* "kuznyechik-mac" */
+    1503,    /* "kuznyechik-mgm" */
     1014,    /* "kuznyechik-ofb" */
     1063,    /* "kx-any" */
     1039,    /* "kx-dhe" */
@@ -5464,6 +5471,7 @@ static const unsigned int ln_objs[NUM_LN] = {
     1187,    /* "magma-ecb" */
     1181,    /* "magma-kexp15" */
     1192,    /* "magma-mac" */
+    1502,    /* "magma-mgm" */
     1189,    /* "magma-ofb" */
      493,    /* "mailPreferenceOption" */
      467,    /* "manager" */
@@ -5856,7 +5864,7 @@ static const unsigned int ln_objs[NUM_LN] = {
      125,    /* "zlib compression" */
 };
 
-#define NUM_OBJ 1350
+#define NUM_OBJ 1352
 static const unsigned int obj_objs[NUM_OBJ] = {
        0,    /* OBJ_undef                        0 */
      181,    /* OBJ_iso                          1 */
@@ -6773,8 +6781,10 @@ static const unsigned int obj_objs[NUM_OBJ] = {
     1122,    /* OBJ_aria_256_ccm                 1 2 410 200046 1 1 39 */
     1174,    /* OBJ_magma_ctr_acpkm              1 2 643 7 1 1 5 1 1 */
     1175,    /* OBJ_magma_ctr_acpkm_omac         1 2 643 7 1 1 5 1 2 */
+    1502,    /* OBJ_magma_mgm                    1 2 643 7 1 1 5 1 3 */
     1177,    /* OBJ_kuznyechik_ctr_acpkm         1 2 643 7 1 1 5 2 1 */
     1178,    /* OBJ_kuznyechik_ctr_acpkm_omac    1 2 643 7 1 1 5 2 2 */
+    1503,    /* OBJ_kuznyechik_mgm               1 2 643 7 1 1 5 2 3 */
     1181,    /* OBJ_magma_kexp15                 1 2 643 7 1 1 7 1 1 */
     1183,    /* OBJ_kuznyechik_kexp15            1 2 643 7 1 1 7 2 1 */
     1148,    /* OBJ_id_tc26_gost_3410_2012_256_paramSetA 1 2 643 7 1 2 1 1 1 */
