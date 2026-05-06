@@ -63,6 +63,8 @@ static const ssl_cipher_table ssl_cipher_table_cipher[SSL_ENC_NUM_IDX] = {
     { SSL_KUZNYECHIK, NID_kuznyechik_ctr_acpkm }, /* SSL_ENC_KUZNYECHIK_IDX 23 */
     { SSL_SM4GCM, NID_sm4_gcm }, /* SSL_ENC_SM4GCM_IDX 24 */
     { SSL_SM4CCM, NID_sm4_ccm }, /* SSL_ENC_SM4CCM_IDX 25 */
+    { SSL_MAGMA_MGM, NID_magma_mgm }, /* SSL_ENC_MAGMA_MGM_IDX 26 */
+    { SSL_KUZNYECHIK_MGM, NID_kuznyechik_mgm }, /* SSL_ENC_KUZNYECHIK_MGM_IDX 27 */
 };
 
 /* NB: make sure indices in this table matches values above */
@@ -311,7 +313,7 @@ int ssl_load_ciphers(SSL_CTX *ctx)
     }
 
 #ifdef OPENSSL_NO_GOST
-    ctx->disabled_enc_mask |= SSL_eGOST2814789CNT | SSL_eGOST2814789CNT12 | SSL_MAGMA | SSL_KUZNYECHIK;
+    ctx->disabled_enc_mask |= SSL_eGOST2814789CNT | SSL_eGOST2814789CNT12 | SSL_MAGMA | SSL_KUZNYECHIK | SSL_MAGMA_MGM | SSL_KUZNYECHIK_MGM;
 #endif
 
     ctx->disabled_mac_mask = 0;
@@ -1801,8 +1803,14 @@ char *SSL_CIPHER_description(const SSL_CIPHER *cipher, char *buf, int len)
     case SSL_MAGMA:
         enc = "MAGMA";
         break;
+    case SSL_MAGMA_MGM:
+        enc = "MAGMAMGM";
+        break;
     case SSL_KUZNYECHIK:
         enc = "KUZNYECHIK";
+        break;
+    case SSL_KUZNYECHIK_MGM:
+        enc = "KUZNYECHIKMGM";
         break;
     case SSL_CHACHA20POLY1305:
         enc = "CHACHA20/POLY1305(256)";
