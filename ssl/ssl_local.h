@@ -787,6 +787,7 @@ typedef struct tls_sigalg_info_st {
     char *hash_oid; /* hash algorithm OID */
     char *keytype; /* keytype name */
     char *keytype_oid; /* keytype OID */
+    char *group_name; /* TLS group name binding, if any */
     unsigned int secbits; /* Bits of security (from SP800-57) */
     int mintls; /* Minimum TLS version, -1 unsupported */
     int maxtls; /* Maximum TLS version (or 0 for undefined) */
@@ -1927,6 +1928,8 @@ typedef struct sigalg_lookup_st {
     int sigandhash;
     /* Required public key curve (ECDSA only) */
     int curve;
+    /* Required provider group name, if any */
+    char *group_name;
     /* Whether this signature algorithm is actually available for use */
     int available;
     /* Whether this signature algorithm is by default advertised */

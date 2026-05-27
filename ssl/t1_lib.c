@@ -553,6 +553,18 @@ static int add_provider_sigalgs(const OSSL_PARAM params[], void *data)
             goto err;
     }
 
+    p = OSSL_PARAM_locate_const(params, OSSL_CAPABILITY_TLS_SIGALG_GROUP_NAME);
+    if (p == NULL) {
+        sinf->group_name = NULL;
+    } else if (p->data_type != OSSL_PARAM_UTF8_STRING) {
+        goto err;
+    } else {
+        OPENSSL_free(sinf->group_name);
+        sinf->group_name = OPENSSL_strdup(p->data);
+        if (sinf->group_name == NULL)
+            goto err;
+    }
+
     /* Optional, not documented prior to 3.5 */
     sinf->mindtls = sinf->maxdtls = -1;
     p = OSSL_PARAM_locate_const(params, OSSL_CAPABILITY_TLS_SIGALG_MIN_DTLS);
@@ -673,6 +685,8 @@ err:
         sinf->keytype = NULL;
         OPENSSL_free(sinf->keytype_oid);
         sinf->keytype_oid = NULL;
+        OPENSSL_free(sinf->group_name);
+        sinf->group_name = NULL;
     }
     return ret;
 }
@@ -2388,6 +2402,7 @@ int ssl_setup_sigalgs(SSL_CTX *ctx)
         /* If unable to create pctx we assume the sig algorithm is unavailable */
         if (pctx == NULL)
             cache[i].available = 0;
+        cache[i].group_name = NULL;
         EVP_PKEY_CTX_free(pctx);
     }
 
@@ -2410,6 +2425,7 @@ int ssl_setup_sigalgs(SSL_CTX *ctx)
         cache[cache_idx].sig_idx = (int)idx;
         cache[cache_idx].sigandhash = OBJ_txt2nid(si.sigalg_name);
         cache[cache_idx].curve = NID_undef;
+        cache[cache_idx].group_name = si.group_name;
         cache[cache_idx].mintls = TLS1_3_VERSION;
         cache[cache_idx].maxtls = TLS1_3_VERSION;
         cache[cache_idx].mindtls = -1;
@@ -2920,6 +2936,11 @@ int tls12_check_peer_sigalg(SSL_CONNECTION *s, uint16_t sig, EVP_PKEY *pkey)
             &cidx, SSL_CONNECTION_GET_CTX(s))
         || lu->sig_idx != (int)cidx) {
         SSLfatal(s, SSL_AD_ILLEGAL_PARAMETER, SSL_R_WRONG_SIGNATURE_TYPE);
+        return 0;
+    }
+
+    if (!sigalg_group_matches_key(SSL_CONNECTION_GET_CTX(s), lu, pkey)) {
+        SSLfatal(s, SSL_AD_ILLEGAL_PARAMETER, SSL_R_WRONG_CURVE);
         return 0;
     }
 
@@ -4781,6 +4802,22 @@ static int has_usable_cert(SSL_CONNECTION *s, const SIGALG_LOOKUP *sig, int idx)
  * Returns true if the supplied cert |x| and key |pkey| is usable with the
  * specified signature scheme |sig|, or false otherwise.
  */
+static int sigalg_group_matches_key(SSL_CTX *ctx, const SIGALG_LOOKUP *sig,
+    const EVP_PKEY *pkey)
+{
+    char gname[OSSL_MAX_NAME_SIZE];
+    const char *actual_group_name;
+
+    if (sig == NULL || sig->group_name == NULL)
+        return 1;
+
+    actual_group_name = tls1_get_pkey_group_name(ctx, pkey, gname, sizeof(gname));
+    if (actual_group_name == NULL)
+        return 0;
+
+    return OPENSSL_strcasecmp(sig->group_name, actual_group_name) == 0;
+}
+
 static int is_cert_usable(SSL_CONNECTION *s, const SIGALG_LOOKUP *sig, X509 *x,
     EVP_PKEY *pkey)
 {
@@ -4791,6 +4828,9 @@ static int is_cert_usable(SSL_CONNECTION *s, const SIGALG_LOOKUP *sig, X509 *x,
 
     /* Check the key is consistent with the sig alg */
     if ((int)idx != sig->sig_idx)
+        return 0;
+
+    if (!sigalg_group_matches_key(SSL_CONNECTION_GET_CTX(s), sig, pkey))
         return 0;
 
     return check_cert_usable(s, sig, x, pkey);
@@ -5134,6 +5174,30 @@ int ssl_get_EC_curve_nid(const EVP_PKEY *pkey)
         return OBJ_txt2nid(gname);
 
     return NID_undef;
+}
+
+static const char *tls1_get_pkey_group_name(SSL_CTX *ctx, const EVP_PKEY *pkey,
+    char *gname, size_t gname_sz)
+{
+    int nid;
+    const char *tlsname;
+
+    if (pkey == NULL || gname == NULL || gname_sz == 0)
+        return NULL;
+
+    if (EVP_PKEY_get_group_name(pkey, gname, gname_sz, NULL) > 0)
+        return gname;
+
+    nid = ssl_get_EC_curve_nid(pkey);
+    if (nid == NID_undef)
+        return NULL;
+
+    tlsname = tls1_group_id2name(ctx, tls1_nid2group_id(nid));
+    if (tlsname == NULL)
+        return NULL;
+
+    OPENSSL_strlcpy(gname, tlsname, gname_sz);
+    return gname;
 }
 
 __owur int tls13_set_encoded_pub_key(EVP_PKEY *pkey,
